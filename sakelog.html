@@ -4,8 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>酒ログ</title>
+
+  <link rel="apple-touch-icon" href="topicon.jpg">
+  <link rel="icon" href="topicon.jpg">
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
   <style>
-    /* 全体設定 */
+    /* 全体設定 - デザインを完全維持 */
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
@@ -13,196 +20,32 @@
       background: #f4f6fa;
       color: #333;
     }
-
-    h1 {
-      font-size: 1.4rem;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    /* 戻るボタン */
-    .back-btn {
-      position: fixed;
-      top: 15px;
-      left: 15px;
-      background: #ffffff;
-      color: #333;
-      padding: 8px 14px;
-      border-radius: 20px;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: bold;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      z-index: 1000;
-    }
-
-    /* ＋追加ボタン */
-    .add-btn {
-      position: fixed;
-      bottom: 30px;
-      right: 20px;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: #4da3ff;
-      color: #fff;
-      font-size: 30px;
-      border: none;
-      box-shadow: 0 4px 12px rgba(77,163,255,0.5);
-      cursor: pointer;
-      z-index: 1000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    /* カードデザイン */
-    #listBody {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .card {
-      background: #fff;
-      padding: 18px;
-      border-radius: 15px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-      position: relative;
-      box-sizing: border-box;
-    }
-
-    /* 日付ラベル */
-    .sake-date {
-      font-size: 0.8rem;
-      color: #888;
-      margin-bottom: 5px;
-    }
-
-    /* お酒の名前 */
-    .sake-name {
-      font-weight: bold;
-      font-size: 1.2rem;
-      margin-bottom: 8px;
-      color: #1a1a1a;
-      line-height: 1.3;
-    }
-
-    /* 種類と場所 */
-    .sake-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      font-size: 0.9rem;
-      color: #555;
-      margin-bottom: 10px;
-    }
-
-    .meta-item {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    /* 星評価 */
-    .stars {
-      display: flex;
-      gap: 2px;
-      margin-bottom: 12px;
-    }
-
-    .star {
-      font-size: 18px;
-      color: #ddd;
-    }
-
-    .star.active {
-      color: #f5b301;
-    }
-
-    /* URLとアクション */
-    .url-area {
-      border-top: 1px solid #eee;
-      padding-top: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .url-link a {
-      font-size: 0.85rem;
-      color: #007aff;
-      text-decoration: none;
-      word-break: break-all;
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-    }
-
-    .edit-btn, .delete-btn {
-      padding: 8px 15px;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 13px;
-      cursor: pointer;
-      min-width: 70px;
-    }
+    h1 { font-size: 1.4rem; text-align: center; margin-bottom: 20px; }
+    .back-btn { position: fixed; top: 15px; left: 15px; background: #ffffff; color: #333; padding: 8px 14px; border-radius: 20px; text-decoration: none; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 1000; }
+    .add-btn { position: fixed; bottom: 30px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: #4da3ff; color: #fff; font-size: 30px; border: none; box-shadow: 0 4px 12px rgba(77,163,255,0.5); cursor: pointer; z-index: 1000; display: flex; justify-content: center; align-items: center; }
+    #listBody { display: flex; flex-direction: column; gap: 15px; }
+    .card { background: #fff; padding: 18px; border-radius: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); position: relative; box-sizing: border-box; }
+    .sake-date { font-size: 0.8rem; color: #888; margin-bottom: 5px; }
+    .sake-name { font-weight: bold; font-size: 1.2rem; margin-bottom: 8px; color: #1a1a1a; line-height: 1.3; }
+    .sake-meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.9rem; color: #555; margin-bottom: 10px; }
+    .meta-item { display: flex; align-items: center; gap: 4px; }
+    .stars { display: flex; gap: 2px; margin-bottom: 12px; }
+    .star { font-size: 18px; color: #ddd; }
+    .star.active { color: #f5b301; }
+    .url-area { border-top: 1px solid #eee; padding-top: 12px; display: flex; flex-direction: column; gap: 12px; }
+    .url-link a { font-size: 0.85rem; color: #007aff; text-decoration: none; word-break: break-all; }
+    .actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .edit-btn, .delete-btn { padding: 8px 15px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; min-width: 70px; }
     .edit-btn { background: #f0f0f0; color: #333; }
     .delete-btn { background: #ffebeb; color: #ff5b5b; }
-
-    /* モーダル */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-      backdrop-filter: blur(4px);
-    }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(4px); }
     .modal.active { display: flex; }
-    .modal-content {
-      background: #fff;
-      padding: 25px;
-      border-radius: 20px;
-      width: 85%;
-      max-width: 400px;
-      overflow-y: auto;
-      max-height: 90vh;
-    }
-    .close-btn {
-      float: right;
-      border: none;
-      background: #eee;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-    }
+    .modal-content { background: #fff; padding: 25px; border-radius: 20px; width: 85%; max-width: 400px; overflow-y: auto; max-height: 90vh; }
+    .close-btn { float: right; border: none; background: #eee; width: 30px; height: 30px; border-radius: 50%; }
     .form-group { margin-bottom: 15px; }
     label { font-weight: bold; display: block; margin-bottom: 5px; font-size: 0.9rem; }
-    input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      box-sizing: border-box;
-      font-size: 16px;
-    }
-    .save-btn {
-      width: 100%;
-      padding: 12px;
-      background: #4da3ff;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-weight: bold;
-      font-size: 1rem;
-    }
+    input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
+    .save-btn { width: 100%; padding: 12px; background: #4da3ff; color: #fff; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; }
     .stars-input { cursor: pointer; display: flex; gap: 8px; }
     .stars-input .star { font-size: 28px; }
   </style>
@@ -210,7 +53,6 @@
 <body>
 
 <a href="index.html" class="back-btn">🏠 戻る</a>
-
 <h1>🍶 酒ログ</h1>
 <button class="add-btn" id="openModal">＋</button>
 
@@ -249,6 +91,22 @@
 <div id="listBody"></div>
 
 <script>
+  // --- Firebase 設定 ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyBI-mu8jElSOrteIz-4mBKDaBSjnkqRItM",
+    authDomain: "project-6007763521791397665.firebaseapp.com",
+    projectId: "project-6007763521791397665",
+    storageBucket: "project-6007763521791397665.firebasestorage.app",
+    messagingSenderId: "606193419071",
+    appId: "1:606193419071:web:4a5fd1c5ff82812cde498a",
+    measurementId: "G-RWY30CWNJ1",
+    databaseURL: "https://project-6007763521791397665-default-rtdb.firebaseio.com"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const sakeRef = db.ref('sakeLog');
+
   const modal = document.getElementById('modal');
   const dateInput = document.getElementById('dateInput');
   const nameInput = document.getElementById('nameInput');
@@ -259,13 +117,15 @@
   const listBody = document.getElementById('listBody');
   const modalTitle = document.getElementById('modalTitle');
 
-  let editIndex = null;
+  let editId = null;
   let currentRate = 0;
-  let data = JSON.parse(localStorage.getItem('sakeLog')) || [];
+  let rawData = {};
 
-  function saveData() {
-    localStorage.setItem('sakeLog', JSON.stringify(data));
-  }
+  // リアルタイム読み込み
+  sakeRef.on('value', (snapshot) => {
+    rawData = snapshot.val() || {};
+    render();
+  });
 
   function renderStars(container, rate, clickable = false) {
     container.innerHTML = '';
@@ -285,7 +145,12 @@
 
   function render() {
     listBody.innerHTML = '';
-    data.forEach((item, index) => {
+    const items = Object.keys(rawData).map(key => ({ ...rawData[key], id: key }));
+    
+    // 日付の新しい順（またはIDの新しい順）にソート
+    items.sort((a, b) => b.id - a.id);
+
+    items.forEach(item => {
       const card = document.createElement('div');
       card.className = 'card';
 
@@ -309,7 +174,7 @@
       `;
 
       card.querySelector('.edit-btn').onclick = () => {
-        editIndex = index;
+        editId = item.id;
         modalTitle.textContent = '編集';
         dateInput.value = item.date || '';
         nameInput.value = item.name;
@@ -323,9 +188,7 @@
 
       card.querySelector('.delete-btn').onclick = () => {
         if (confirm('削除しますか？')) {
-          data.splice(index, 1);
-          saveData();
-          render();
+          db.ref('sakeLog/' + item.id).remove();
         }
       };
 
@@ -334,7 +197,7 @@
   }
 
   document.getElementById('openModal').onclick = () => {
-    editIndex = null;
+    editId = null;
     modalTitle.textContent = '追加';
     dateInput.value = new Date().toISOString().split('T')[0];
     nameInput.value = typeInput.value = placeInput.value = urlInput.value = '';
@@ -350,7 +213,7 @@
     const nameValue = nameInput.value.trim();
     if (!nameValue) return alert('お酒の名前を入力してください');
     
-    const item = {
+    const itemData = {
       date: dateInput.value,
       name: nameValue,
       type: typeInput.value.trim(),
@@ -359,15 +222,15 @@
       url: urlInput.value.trim()
     };
 
-    if (editIndex === null) data.unshift(item);
-    else data[editIndex] = item;
+    if (editId) {
+      db.ref('sakeLog/' + editId).update(itemData);
+    } else {
+      const newId = Date.now().toString();
+      db.ref('sakeLog/' + newId).set(itemData);
+    }
 
-    saveData();
-    render();
     modal.classList.remove('active');
   };
-
-  render();
 </script>
 </body>
 </html>

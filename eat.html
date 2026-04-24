@@ -4,8 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>食べたいものリスト</title>
+
+  <link rel="apple-touch-icon" href="topicon.jpg">
+  <link rel="icon" href="topicon.jpg">
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
   <style>
-    /* 全体設定 */
+    /* 全体設定 - 以前のデザインを完全維持 */
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
@@ -13,196 +20,38 @@
       background: #f4f6fa;
       color: #333;
     }
-
-    h1 {
-      font-size: 1.4rem;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    /* 戻るボタン */
-    .back-btn {
-      position: fixed;
-      top: 15px;
-      left: 15px;
-      background: #ffffff;
-      color: #333;
-      padding: 8px 14px;
-      border-radius: 20px;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: bold;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      z-index: 1000;
-    }
-
-    /* ＋追加ボタン */
-    .add-btn {
-      position: fixed;
-      bottom: 30px;
-      right: 20px;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: #4da3ff;
-      color: #fff;
-      font-size: 30px;
-      border: none;
-      box-shadow: 0 4px 12px rgba(77,163,255,0.5);
-      cursor: pointer;
-      z-index: 1000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    /* カードデザイン */
-    #listBody {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .card {
-      background: #fff;
-      padding: 15px;
-      border-radius: 15px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-      position: relative;
-      box-sizing: border-box;
-    }
-
-    /* 食べた！チェックボックス */
-    .done-check {
-      position: absolute;
-      top: 18px;
-      left: 15px;
-    }
-    
-    .done-check input[type="checkbox"] {
-      width: 22px;
-      height: 22px;
-    }
-
-    /* テキスト情報 */
-    .food-title {
-      font-weight: bold;
-      font-size: 1.1rem;
-      padding: 0 0 5px 40px;
-      word-break: break-all;
-      line-height: 1.4;
-    }
-
-    .store-info {
-      font-size: 0.95rem;
-      color: #333;
-      padding: 0 0 5px 40px;
-    }
-
-    .place-info {
-      font-size: 0.85rem;
-      color: #777;
-      padding: 0 0 10px 40px;
-    }
-
-    .url-area {
-      padding-left: 40px;
-      border-top: 1px solid #eee;
-      padding-top: 10px;
-    }
-
-    .url-link {
-      font-size: 0.85rem;
-      word-break: break-all;
-      margin-bottom: 10px;
-    }
-    .url-link a {
-      color: #007aff;
-      text-decoration: none;
-    }
-
-    /* 操作ボタン */
-    .actions {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-    }
-
-    .edit-btn, .delete-btn {
-      padding: 8px 15px;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 13px;
-      cursor: pointer;
-      min-width: 70px;
-    }
+    h1 { font-size: 1.4rem; text-align: center; margin-bottom: 20px; }
+    .back-btn { position: fixed; top: 15px; left: 15px; background: #ffffff; color: #333; padding: 8px 14px; border-radius: 20px; text-decoration: none; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 1000; }
+    .add-btn { position: fixed; bottom: 30px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: #4da3ff; color: #fff; font-size: 30px; border: none; box-shadow: 0 4px 12px rgba(77,163,255,0.5); cursor: pointer; z-index: 1000; display: flex; justify-content: center; align-items: center; }
+    #listBody { display: flex; flex-direction: column; gap: 15px; }
+    .card { background: #fff; padding: 15px; border-radius: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); position: relative; box-sizing: border-box; }
+    .done-check { position: absolute; top: 18px; left: 15px; }
+    .done-check input[type="checkbox"] { width: 22px; height: 22px; }
+    .food-title { font-weight: bold; font-size: 1.1rem; padding: 0 0 5px 40px; word-break: break-all; line-height: 1.4; }
+    .store-info { font-size: 0.95rem; color: #333; padding: 0 0 5px 40px; }
+    .place-info { font-size: 0.85rem; color: #777; padding: 0 0 10px 40px; }
+    .url-area { padding-left: 40px; border-top: 1px solid #eee; padding-top: 10px; }
+    .url-link { font-size: 0.85rem; word-break: break-all; margin-bottom: 10px; }
+    .url-link a { color: #007aff; text-decoration: none; }
+    .actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .edit-btn, .delete-btn { padding: 8px 15px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; min-width: 70px; }
     .edit-btn { background: #f0f0f0; color: #333; }
     .delete-btn { background: #ffebeb; color: #ff5b5b; }
-
-    /* 完了済み（食べた！） */
-    .card.done-row {
-      background: #f8f8f8;
-      opacity: 0.7;
-    }
-    .card.done-row .food-title {
-      text-decoration: line-through;
-      color: #888;
-    }
-
-    /* モーダル */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-      backdrop-filter: blur(4px);
-    }
+    .card.done-row { background: #f8f8f8; opacity: 0.7; }
+    .card.done-row .food-title { text-decoration: line-through; color: #888; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(4px); }
     .modal.active { display: flex; }
-    .modal-content {
-      background: #fff;
-      padding: 25px;
-      border-radius: 20px;
-      width: 85%;
-      max-width: 400px;
-    }
-    .close-btn {
-      float: right;
-      border: none;
-      background: #eee;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-    }
+    .modal-content { background: #fff; padding: 25px; border-radius: 20px; width: 85%; max-width: 400px; }
+    .close-btn { float: right; border: none; background: #eee; width: 30px; height: 30px; border-radius: 50%; }
     .form-group { margin-bottom: 15px; }
     label { font-weight: bold; display: block; margin-bottom: 5px; font-size: 0.9rem; }
-    input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      box-sizing: border-box;
-      font-size: 16px;
-    }
-    .save-btn {
-      width: 100%;
-      padding: 12px;
-      background: #4da3ff;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-weight: bold;
-      font-size: 1rem;
-    }
+    input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
+    .save-btn { width: 100%; padding: 12px; background: #4da3ff; color: #fff; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; }
   </style>
 </head>
 <body>
 
 <a href="index.html" class="back-btn">🏠 戻る</a>
-
 <h1>🍖 食べたいものリスト</h1>
 <button class="add-btn" id="openModal">＋</button>
 
@@ -212,15 +61,15 @@
     <h2 id="modalTitle" style="margin-top:0">追加</h2>
     <div class="form-group">
       <label>食べ物</label>
-      <input id="foodInput" placeholder="例：特製醤油ラーメン">
+      <input id="foodInput" placeholder="例：とんこつラーメン">
     </div>
     <div class="form-group">
       <label>店名</label>
-      <input id="storeInput" placeholder="例：麺屋まるいち">
+      <input id="storeInput" placeholder="例：一蘭">
     </div>
     <div class="form-group">
       <label>場所</label>
-      <input id="placeInput" placeholder="例：新宿駅西口">
+      <input id="placeInput" placeholder="例：渋谷店">
     </div>
     <div class="form-group">
       <label>URL</label>
@@ -233,6 +82,23 @@
 <div id="listBody"></div>
 
 <script>
+  // --- Firebase 設定 ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyBI-mu8jElSOrteIz-4mBKDaBSjnkqRItM",
+    authDomain: "project-6007763521791397665.firebaseapp.com",
+    projectId: "project-6007763521791397665",
+    storageBucket: "project-6007763521791397665.firebasestorage.app",
+    messagingSenderId: "606193419071",
+    appId: "1:606193419071:web:4a5fd1c5ff82812cde498a",
+    measurementId: "G-RWY30CWNJ1",
+    databaseURL: "https://project-6007763521791397665-default-rtdb.firebaseio.com"
+  };
+
+  // 初期化
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const eatRef = db.ref('eatList');
+
   const modal = document.getElementById('modal');
   const foodInput = document.getElementById('foodInput');
   const storeInput = document.getElementById('storeInput');
@@ -241,21 +107,30 @@
   const listBody = document.getElementById('listBody');
   const modalTitle = document.getElementById('modalTitle');
 
-  let editIndex = null;
-  let data = JSON.parse(localStorage.getItem('eatList')) || [];
+  let editId = null;
+  let rawData = {};
 
-  function saveData() {
-    localStorage.setItem('eatList', JSON.stringify(data));
-  }
+  // リアルタイム読み込み
+  eatRef.on('value', (snapshot) => {
+    rawData = snapshot.val() || {};
+    render();
+  });
 
   function render() {
     listBody.innerHTML = '';
     
-    const sortedData = data.map((item, index) => ({ ...item, originalIndex: index }));
-    sortedData.sort((a, b) => a.done - b.done);
+    const items = Object.keys(rawData).map(key => ({
+      ...rawData[key],
+      id: key
+    }));
 
-    sortedData.forEach(item => {
-      const index = item.originalIndex;
+    // 未完了を上に、新しい順にソート
+    items.sort((a, b) => {
+      if (a.done !== b.done) return a.done ? 1 : -1;
+      return b.id - a.id;
+    });
+
+    items.forEach(item => {
       const card = document.createElement('div');
       card.className = 'card' + (item.done ? ' done-row' : '');
 
@@ -276,13 +151,11 @@
       `;
 
       card.querySelector('input[type="checkbox"]').onchange = (e) => {
-        data[index].done = e.target.checked;
-        saveData();
-        render();
+        db.ref('eatList/' + item.id).update({ done: e.target.checked });
       };
 
       card.querySelector('.edit-btn').onclick = () => {
-        editIndex = index;
+        editId = item.id;
         modalTitle.textContent = '編集';
         foodInput.value = item.food;
         storeInput.value = item.store || '';
@@ -293,9 +166,7 @@
 
       card.querySelector('.delete-btn').onclick = () => {
         if (confirm('削除しますか？')) {
-          data.splice(index, 1);
-          saveData();
-          render();
+          db.ref('eatList/' + item.id).remove();
         }
       };
 
@@ -304,36 +175,35 @@
   }
 
   document.getElementById('openModal').onclick = () => {
-    editIndex = null;
+    editId = null;
     modalTitle.textContent = '追加';
     foodInput.value = storeInput.value = placeInput.value = urlInput.value = '';
     modal.classList.add('active');
   };
-
   document.getElementById('closeModal').onclick = () => modal.classList.remove('active');
   modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('active'); };
 
   document.getElementById('saveBtn').onclick = () => {
     const foodValue = foodInput.value.trim();
     if (!foodValue) return alert('食べ物を入力してください');
-    
-    const item = {
+
+    const itemData = {
       food: foodValue,
       store: storeInput.value.trim(),
       place: placeInput.value.trim(),
       url: urlInput.value.trim(),
-      done: editIndex !== null ? data[editIndex].done : false
+      done: editId ? rawData[editId].done : false
     };
 
-    if (editIndex === null) data.push(item);
-    else data[editIndex] = item;
+    if (editId) {
+      db.ref('eatList/' + editId).update(itemData);
+    } else {
+      const newId = Date.now().toString();
+      db.ref('eatList/' + newId).set({ ...itemData, id: newId });
+    }
 
-    saveData();
-    render();
     modal.classList.remove('active');
   };
-
-  render();
 </script>
 </body>
 </html>
