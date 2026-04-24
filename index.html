@@ -4,6 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>メニュー一覧</title>
+
+  <link rel="apple-touch-icon" href="topicon.jpg">
+  <link rel="icon" href="topicon.jpg">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="マイアプリ">
+
   <style>
     :root{
       --bg:#0f1216;
@@ -38,6 +46,7 @@
     h1{
       font-size:28px;
       margin-bottom:16px;
+      text-align: center; /* タイトルを中央に */
     }
     .desc{
       color:var(--muted);
@@ -63,6 +72,7 @@
       color:inherit;
       border:1px solid rgba(255,255,255,.06);
       transition: transform .08s ease, box-shadow .15s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     .menu-item:hover{
       transform:translateY(-1px);
