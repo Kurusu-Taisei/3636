@@ -5,15 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>酒ログ</title>
   <style>
+    /* 全体設定 */
     body {
-      font-family: sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 80px 15px 100px;
       background: #f4f6fa;
       color: #333;
     }
 
     h1 {
+      font-size: 1.4rem;
       text-align: center;
       margin-bottom: 20px;
     }
@@ -21,256 +23,241 @@
     /* 戻るボタン */
     .back-btn {
       position: fixed;
-      top: 12px;
-      left: 12px;
-      background: #171b21;
-      color: #fff;
+      top: 15px;
+      left: 15px;
+      background: #ffffff;
+      color: #333;
       padding: 8px 14px;
-      border-radius: 8px;
+      border-radius: 20px;
       text-decoration: none;
+      font-size: 14px;
       font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       z-index: 1000;
     }
 
+    /* ＋追加ボタン */
     .add-btn {
-      display: block;
-      margin: 0 auto 20px;
-      padding: 10px 20px;
+      position: fixed;
+      bottom: 30px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
       background: #4da3ff;
       color: #fff;
+      font-size: 30px;
+      border: none;
+      box-shadow: 0 4px 12px rgba(77,163,255,0.5);
+      cursor: pointer;
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* カードデザイン */
+    #listBody {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .card {
+      background: #fff;
+      padding: 18px;
+      border-radius: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    /* 日付ラベル */
+    .sake-date {
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 5px;
+    }
+
+    /* お酒の名前 */
+    .sake-name {
       font-weight: bold;
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+      color: #1a1a1a;
+      line-height: 1.3;
+    }
+
+    /* 種類と場所 */
+    .sake-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* 星評価 */
+    .stars {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 12px;
+    }
+
+    .star {
+      font-size: 18px;
+      color: #ddd;
+    }
+
+    .star.active {
+      color: #f5b301;
+    }
+
+    /* URLとアクション */
+    .url-area {
+      border-top: 1px solid #eee;
+      padding-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .url-link a {
+      font-size: 0.85rem;
+      color: #007aff;
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .edit-btn, .delete-btn {
+      padding: 8px 15px;
       border: none;
       border-radius: 8px;
+      font-weight: bold;
+      font-size: 13px;
       cursor: pointer;
+      min-width: 70px;
     }
+    .edit-btn { background: #f0f0f0; color: #333; }
+    .delete-btn { background: #ffebeb; color: #ff5b5b; }
 
     /* モーダル */
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.6);
       justify-content: center;
       align-items: center;
       z-index: 2000;
+      backdrop-filter: blur(4px);
     }
-    .modal.active {
-      display: flex;
-    }
-
+    .modal.active { display: flex; }
     .modal-content {
       background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 420px;
-      position: relative;
+      padding: 25px;
+      border-radius: 20px;
+      width: 85%;
+      max-width: 400px;
+      overflow-y: auto;
+      max-height: 90vh;
     }
-
     .close-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
+      float: right;
       border: none;
-      background: none;
-      font-size: 18px;
-      cursor: pointer;
+      background: #eee;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
     }
-
-    .form-group {
-      margin-bottom: 12px;
-    }
-
-    label {
-      font-weight: bold;
-      display: block;
-      margin-bottom: 4px;
-    }
-
+    .form-group { margin-bottom: 15px; }
+    label { font-weight: bold; display: block; margin-bottom: 5px; font-size: 0.9rem; }
     input {
       width: 100%;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      box-sizing: border-box;
+      font-size: 16px;
     }
-
-    .stars {
-      display: flex;
-      gap: 4px;
-      cursor: pointer;
-    }
-
-    .star {
-      font-size: 20px;
-      color: #ddd;
-    }
-
-    .star.active {
-      color: #f5b301; /* 黄色 */
-    }
-
     .save-btn {
-      margin-top: 10px;
-      padding: 8px 16px;
-      background: #4da3ff;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    table {
       width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,.1);
-      table-layout: fixed;
-    }
-
-    th, td {
-      padding: 10px;
-      border-bottom: 1px solid #e0e0e0;
-      text-align: left;
-      vertical-align: middle;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    th {
+      padding: 12px;
       background: #4da3ff;
       color: #fff;
-    }
-
-    th.date, td.date { width: 110px; }
-    th.name, td.name { width: 140px; }
-    th.type, td.type { width: 100px; }
-    th.place, td.place { width: 120px; }
-    th.rate, td.rate { width: 120px; }
-    th.url, td.url { width: 260px; }
-
-    /* URL + 操作ボタン固定 */
-    .url-cell {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .url-text {
-      max-width: 140px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .url-text a {
-      color: #1e66ff;
-      text-decoration: none;
-    }
-
-    .actions {
-      display: inline-flex;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-
-    .edit-btn {
-      padding: 4px 8px;
-      background: #ffa94d;
-      color: #fff;
       border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 1rem;
     }
-
-    .delete-btn {
-      padding: 4px 8px;
-      background: #ff6b6b;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-    }
+    .stars-input { cursor: pointer; display: flex; gap: 8px; }
+    .stars-input .star { font-size: 28px; }
   </style>
 </head>
 <body>
 
-<a href="index.html" class="back-btn">🏠 メニュー一覧へ</a>
+<a href="index.html" class="back-btn">🏠 戻る</a>
 
 <h1>🍶 酒ログ</h1>
-<button class="add-btn" id="openModal">＋追加する</button>
+<button class="add-btn" id="openModal">＋</button>
 
-<!-- モーダル -->
 <div class="modal" id="modal">
   <div class="modal-content">
     <button class="close-btn" id="closeModal">✕</button>
-    <h2 id="modalTitle">追加</h2>
-
+    <h2 id="modalTitle" style="margin-top:0">追加</h2>
     <div class="form-group">
       <label>飲んだ日付</label>
       <input type="date" id="dateInput">
     </div>
-
     <div class="form-group">
       <label>お酒の名前</label>
       <input id="nameInput" placeholder="例：獺祭 純米大吟醸">
     </div>
-
     <div class="form-group">
       <label>種類</label>
       <input id="typeInput" placeholder="例：日本酒">
     </div>
-
     <div class="form-group">
       <label>飲んだ場所</label>
       <input id="placeInput" placeholder="例：自宅">
     </div>
-
     <div class="form-group">
       <label>おいしさ</label>
-      <div class="stars" id="starInput"></div>
+      <div class="stars-input" id="starInput"></div>
     </div>
-
     <div class="form-group">
       <label>URL</label>
-      <input id="urlInput" placeholder="https://example.com">
+      <input id="urlInput" type="url" placeholder="https://example.com">
     </div>
-
-    <button class="save-btn" id="saveBtn">保存</button>
+    <button class="save-btn" id="saveBtn">保存する</button>
   </div>
 </div>
 
-<table>
-  <thead>
-    <tr>
-      <th class="date">飲んだ日付</th>
-      <th class="name">お酒の名前</th>
-      <th class="type">種類</th>
-      <th class="place">飲んだ場所</th>
-      <th class="rate">おいしさ</th>
-      <th class="url">URL</th>
-    </tr>
-  </thead>
-  <tbody id="listBody"></tbody>
-</table>
+<div id="listBody"></div>
 
 <script>
   const modal = document.getElementById('modal');
-  const listBody = document.getElementById('listBody');
-  const modalTitle = document.getElementById('modalTitle');
-
   const dateInput = document.getElementById('dateInput');
   const nameInput = document.getElementById('nameInput');
   const typeInput = document.getElementById('typeInput');
   const placeInput = document.getElementById('placeInput');
   const urlInput = document.getElementById('urlInput');
   const starInput = document.getElementById('starInput');
+  const listBody = document.getElementById('listBody');
+  const modalTitle = document.getElementById('modalTitle');
 
   let editIndex = null;
   let currentRate = 0;
@@ -298,49 +285,43 @@
 
   function render() {
     listBody.innerHTML = '';
-
     data.forEach((item, index) => {
-      const tr = document.createElement('tr');
+      const card = document.createElement('div');
+      card.className = 'card';
 
-      tr.innerHTML = `
-        <td class="date">${item.date}</td>
-        <td class="name">${item.name}</td>
-        <td class="type">${item.type}</td>
-        <td class="place">${item.place}</td>
-        <td class="rate">
-          <div class="stars">
-            ${[1,2,3,4,5].map(n =>
-              `<span class="star ${n <= item.rate ? 'active' : ''}">★</span>`
-            ).join('')}
+      card.innerHTML = `
+        <div class="sake-date">${item.date || '日付未入力'}</div>
+        <div class="sake-name">${item.name}</div>
+        <div class="sake-meta">
+          ${item.type ? `<span class="meta-item">🏷 ${item.type}</span>` : ''}
+          ${item.place ? `<span class="meta-item">📍 ${item.place}</span>` : ''}
+        </div>
+        <div class="stars">
+          ${[1,2,3,4,5].map(n => `<span class="star ${n <= item.rate ? 'active' : ''}">★</span>`).join('')}
+        </div>
+        <div class="url-area">
+          ${item.url ? `<div class="url-link"><a href="${item.url}" target="_blank">🔗 リンクを開く</a></div>` : ''}
+          <div class="actions">
+            <button class="edit-btn">編集</button>
+            <button class="delete-btn">削除</button>
           </div>
-        </td>
-        <td class="url">
-          <div class="url-cell">
-            <div class="url-text">
-              ${item.url ? `<a href="${item.url}" target="_blank">${item.url}</a>` : ''}
-            </div>
-            <div class="actions">
-              <button class="edit-btn">編集</button>
-              <button class="delete-btn">削除</button>
-            </div>
-          </div>
-        </td>
+        </div>
       `;
 
-      tr.querySelector('.edit-btn').onclick = () => {
+      card.querySelector('.edit-btn').onclick = () => {
         editIndex = index;
         modalTitle.textContent = '編集';
-        dateInput.value = item.date;
+        dateInput.value = item.date || '';
         nameInput.value = item.name;
-        typeInput.value = item.type;
-        placeInput.value = item.place;
-        urlInput.value = item.url;
-        currentRate = item.rate;
+        typeInput.value = item.type || '';
+        placeInput.value = item.place || '';
+        urlInput.value = item.url || '';
+        currentRate = item.rate || 0;
         renderStars(starInput, currentRate, true);
         modal.classList.add('active');
       };
 
-      tr.querySelector('.delete-btn').onclick = () => {
+      card.querySelector('.delete-btn').onclick = () => {
         if (confirm('削除しますか？')) {
           data.splice(index, 1);
           saveData();
@@ -348,46 +329,38 @@
         }
       };
 
-      listBody.appendChild(tr);
+      listBody.appendChild(card);
     });
   }
 
   document.getElementById('openModal').onclick = () => {
     editIndex = null;
     modalTitle.textContent = '追加';
-    dateInput.value = '';
-    nameInput.value = '';
-    typeInput.value = '';
-    placeInput.value = '';
-    urlInput.value = '';
+    dateInput.value = new Date().toISOString().split('T')[0];
+    nameInput.value = typeInput.value = placeInput.value = urlInput.value = '';
     currentRate = 0;
     renderStars(starInput, currentRate, true);
     modal.classList.add('active');
   };
 
   document.getElementById('closeModal').onclick = () => modal.classList.remove('active');
-  modal.onclick = e => { if (e.target === modal) modal.classList.remove('active'); };
+  modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('active'); };
 
   document.getElementById('saveBtn').onclick = () => {
-    if (!nameInput.value.trim()) {
-      alert('お酒の名前を入力してください');
-      return;
-    }
-
+    const nameValue = nameInput.value.trim();
+    if (!nameValue) return alert('お酒の名前を入力してください');
+    
     const item = {
       date: dateInput.value,
-      name: nameInput.value.trim(),
+      name: nameValue,
       type: typeInput.value.trim(),
       place: placeInput.value.trim(),
       rate: currentRate,
       url: urlInput.value.trim()
     };
 
-    if (editIndex === null) {
-      data.unshift(item);
-    } else {
-      data[editIndex] = item;
-    }
+    if (editIndex === null) data.unshift(item);
+    else data[editIndex] = item;
 
     saveData();
     render();
@@ -396,6 +369,5 @@
 
   render();
 </script>
-
 </body>
 </html>
