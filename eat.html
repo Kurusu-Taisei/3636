@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>食べたいものリスト</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f4f6fa;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* 戻るボタン */
+    .back-btn {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      background: #171b21;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      z-index: 1000;
+    }
+
+    .add-btn {
+      display: block;
+      margin: 0 auto 20px;
+      padding: 10px 20px;
+      background: #4da3ff;
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    /* モーダル */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 420px;
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      border: none;
+      background: none;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .save-btn {
+      margin-top: 10px;
+      padding: 8px 16px;
+      background: #4da3ff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      table-layout: fixed;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #e0e0e0;
+      text-align: left;
+      vertical-align: middle;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #4da3ff;
+      color: #fff;
+    }
+
+    th.done, td.done { width: 50px; text-align: center; }
+    th.food, td.food { width: 120px; }
+    th.store, td.store { width: 120px; }
+    th.place, td.place { width: 100px; }
+    th.url, td.url { width: 260px; }
+
+    /* URL + 操作ボタンの固定レイアウト */
+    .url-cell {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .url-text {
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .url-text a {
+      color: #1e66ff;
+      text-decoration: none;
+    }
+
+    .actions {
+      display: inline-flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .edit-btn {
+      padding: 4px 8px;
+      background: #ffa94d;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .delete-btn {
+      padding: 4px 8px;
+      background: #ff6b6b;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    /* 済の行 */
+    tr.done-row {
+      background: #f0f0f0;
+      color: #999;
+    }
+    tr.done-row a {
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+
+<a href="menu_list.html" class="back-btn">🏠 メニュー一覧へ</a>
+
+<h1>🍖 食べたいものリスト</h1>
+<button class="add-btn" id="openModal">＋追加する</button>
+
+<!-- モーダル -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <button class="close-btn" id="closeModal">✕</button>
+    <h2 id="modalTitle">追加</h2>
+
+    <div class="form-group">
+      <label>食べ物</label>
+      <input id="foodInput" placeholder="例：ラーメン">
+    </div>
+
+    <div class="form-group">
+      <label>店名</label>
+      <input id="storeInput" placeholder="例：一蘭">
+    </div>
+
+    <div class="form-group">
+      <label>場所</label>
+      <input id="placeInput" placeholder="例：渋谷">
+    </div>
+
+    <div class="form-group">
+      <label>URL</label>
+      <input id="urlInput" placeholder="https://example.com">
+    </div>
+
+    <button class="save-btn" id="saveBtn">保存</button>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th class="done">食べた！</th>
+      <th class="food">食べ物</th>
+      <th class="store">店名</th>
+      <th class="place">場所</th>
+      <th class="url">URL</th>
+    </tr>
+  </thead>
+  <tbody id="listBody"></tbody>
+</table>
+
+<script>
+  const modal = document.getElementById('modal');
+  const foodInput = document.getElementById('foodInput');
+  const storeInput = document.getElementById('storeInput');
+  const placeInput = document.getElementById('placeInput');
+  const urlInput = document.getElementById('urlInput');
+  const listBody = document.getElementById('listBody');
+  const modalTitle = document.getElementById('modalTitle');
+
+  let editIndex = null;
+  let data = JSON.parse(localStorage.getItem('eatList')) || [];
+
+  function saveData() {
+    localStorage.setItem('eatList', JSON.stringify(data));
+  }
+
+  function render() {
+    listBody.innerHTML = '';
+
+    const sorted = [
+      ...data.filter(d => !d.done),
+      ...data.filter(d => d.done)
+    ];
+
+    sorted.forEach(item => {
+      const index = data.indexOf(item);
+      const tr = document.createElement('tr');
+      if (item.done) tr.classList.add('done-row');
+
+      tr.innerHTML = `
+        <td class="done">
+          <input type="checkbox" ${item.done ? 'checked' : ''}>
+        </td>
+        <td class="food">${item.food}</td>
+        <td class="store">${item.store}</td>
+        <td class="place">${item.place}</td>
+        <td class="url">
+          <div class="url-cell">
+            <div class="url-text">
+              ${item.url ? `<a href="${item.url}" target="_blank">${item.url}</a>` : ''}
+            </div>
+            <div class="actions">
+              <button class="edit-btn">編集</button>
+              <button class="delete-btn">削除</button>
+            </div>
+          </div>
+        </td>
+      `;
+
+      tr.querySelector('input[type="checkbox"]').onchange = e => {
+        data[index].done = e.target.checked;
+        saveData();
+        render();
+      };
+
+      tr.querySelector('.edit-btn').onclick = () => {
+        editIndex = index;
+        modalTitle.textContent = '編集';
+        foodInput.value = item.food;
+        storeInput.value = item.store;
+        placeInput.value = item.place;
+        urlInput.value = item.url;
+        modal.classList.add('active');
+      };
+
+      tr.querySelector('.delete-btn').onclick = () => {
+        if (confirm('削除しますか？')) {
+          data.splice(index, 1);
+          saveData();
+          render();
+        }
+      };
+
+      listBody.appendChild(tr);
+    });
+  }
+
+  document.getElementById('openModal').onclick = () => {
+    editIndex = null;
+    modalTitle.textContent = '追加';
+    foodInput.value = storeInput.value = placeInput.value = urlInput.value = '';
+    modal.classList.add('active');
+  };
+
+  document.getElementById('closeModal').onclick = () => modal.classList.remove('active');
+  modal.onclick = e => { if (e.target === modal) modal.classList.remove('active'); };
+
+  document.getElementById('saveBtn').onclick = () => {
+    if (!foodInput.value.trim()) {
+      alert('食べ物を入力してください');
+      return;
+    }
+
+    const item = {
+      food: foodInput.value.trim(),
+      store: storeInput.value.trim(),
+      place: placeInput.value.trim(),
+      url: urlInput.value.trim(),
+      done: false
+    };
+
+    if (editIndex === null) {
+      data.push(item);
+    } else {
+      item.done = data[editIndex].done;
+      data[editIndex] = item;
+    }
+
+    saveData();
+    render();
+    modal.classList.remove('active');
+  };
+
+  render();
+</script>
+
+</body>
+</html>

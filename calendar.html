@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>📅 カレンダー</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f4f6fa;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      position: sticky;
+      top: 0;
+      background: #f4f6fa;
+      padding: 10px 0;
+      z-index: 100;
+    }
+    .calendar {
+      margin: 0 auto 40px;
+      max-width: 600px;
+      border-collapse: collapse;
+      width: 100%;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,.1);
+    }
+    .calendar caption {
+      text-align: center;
+      font-weight: bold;
+      font-size: 20px;
+      padding: 10px;
+      background: #4da3ff;
+      color: #fff;
+    }
+    .calendar th, .calendar td {
+      width: 14.28%;
+      text-align: center;
+      padding: 10px;
+      border: 1px solid #e0e0e0;
+    }
+    .calendar th {
+      background: #f0f3f8;
+      font-weight: 600;
+    }
+    .calendar th.sun, .calendar td.sun { color: red; }
+    .calendar th.sat, .calendar td.sat { color: blue; }
+    .calendar td.empty { background: #fafafa; }
+    .calendar td.today { background: #ffeaa7; font-weight: bold; border: 2px solid #fdcb6e; }
+  </style>
+</head>
+<body>
+  <h1>📅 カレンダー</h1>
+  <div id="calendar-container"></div>
+
+  <script>
+    const container = document.getElementById("calendar-container");
+    const today = new Date();
+    let futureYear = today.getFullYear(), futureMonth = today.getMonth();
+    let pastYear = today.getFullYear(), pastMonth = today.getMonth();
+
+    function createCalendar(year, month) {
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const monthName = `${year}年 ${month + 1}月`;
+      const table = document.createElement("table");
+      table.className = "calendar";
+
+      // キャプション
+      const caption = document.createElement("caption");
+      caption.textContent = monthName;
+      table.appendChild(caption);
+
+      // ヘッダー
+      const thead = document.createElement("thead");
+      let tr = document.createElement("tr");
+      const days = ["日", "月", "火", "水", "木", "金", "土"];
+      days.forEach((d, i) => {
+        const th = document.createElement("th");
+        th.textContent = d;
+        if (i === 0) th.classList.add("sun");
+        if (i === 6) th.classList.add("sat");
+        tr.appendChild(th);
+      });
+      thead.appendChild(tr);
+      table.appendChild(thead);
+
+      // 本文
+      const tbody = document.createElement("tbody");
+      tr = document.createElement("tr");
+      for (let i = 0; i < firstDay.getDay(); i++) {
+        let td = document.createElement("td");
+        td.className = "empty";
+        tr.appendChild(td);
+      }
+
+      for (let d = 1; d <= lastDay.getDate(); d++) {
+        const date = new Date(year, month, d);
+        const td = document.createElement("td");
+        td.textContent = d;
+        if (d === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+          td.classList.add("today");
+        }
+        if (date.getDay() === 0) td.classList.add("sun");
+        if (date.getDay() === 6) td.classList.add("sat");
+        tr.appendChild(td);
+        if (date.getDay() === 6) {
+          tbody.appendChild(tr);
+          tr = document.createElement("tr");
+        }
+      }
+      if (tr.children.length > 0) {
+        while (tr.children.length < 7) {
+          let td = document.createElement("td");
+          td.className = "empty";
+          tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+      }
+
+      table.appendChild(tbody);
+      return table;
+    }
+
+    // 初期表示：縦に6か月分
+for (let i = 0; i < 6; i++) {
+  container.appendChild(createCalendar(futureYear, futureMonth));
+  futureMonth++;
+  if (futureMonth > 11) { futureMonth = 0; futureYear++; }
+}
+
+    // 無限スクロール
+    window.addEventListener("scroll", () => {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 50) {
+        futureMonth++;
+        if (futureMonth > 11) { futureMonth = 0; futureYear++; }
+        container.appendChild(createCalendar(futureYear, futureMonth));
+      }
+      if (window.scrollY < 50) {
+        pastMonth--;
+        if (pastMonth < 0) { pastMonth = 11; pastYear--; }
+        const prev = createCalendar(pastYear, pastMonth);
+        container.insertBefore(prev, container.firstChild);
+        window.scrollTo(0, prev.offsetHeight + 40);
+      }
+    });
+  </script>
+</body>
+</html>
