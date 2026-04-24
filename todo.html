@@ -5,43 +5,156 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ToDoリスト</title>
   <style>
+    /* 全体設定 */
     body {
-      font-family: sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
-      padding: 20px;
-      background: #f4f6fa;
+      padding: 80px 15px 100px; /* 上下のボタン重なり防止 */
+      background: #f0f2f5;
       color: #333;
     }
 
     h1 {
+      font-size: 1.4rem;
       text-align: center;
       margin-bottom: 20px;
     }
 
-    /* 戻るボタン */
+    /* 戻るボタン（左上固定） */
     .back-btn {
       position: fixed;
-      top: 12px;
-      left: 12px;
-      background: #171b21;
-      color: #fff;
+      top: 15px;
+      left: 15px;
+      background: #ffffff;
+      color: #333;
       padding: 8px 14px;
-      border-radius: 8px;
+      border-radius: 20px;
       text-decoration: none;
+      font-size: 14px;
       font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       z-index: 1000;
     }
 
+    /* ＋追加ボタン（右下固定：スマホアプリ風） */
     .add-btn {
-      display: block;
-      margin: 0 auto 20px;
-      padding: 10px 20px;
+      position: fixed;
+      bottom: 30px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
       background: #4da3ff;
       color: #fff;
+      font-size: 30px;
+      border: none;
+      box-shadow: 0 4px 12px rgba(77,163,255,0.5);
+      cursor: pointer;
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* テーブル構造を解除してカード形式にする */
+    table, thead, tbody, th, td, tr {
+      display: block;
+      width: 100%;
+    }
+
+    thead { display: none; } /* ヘッダー（済、やること等）は非表示 */
+
+    /* カードのデザイン */
+    tr {
+      background: #fff;
+      margin-bottom: 15px;
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    /* チェックボックスの位置 */
+    td.done {
+      position: absolute;
+      top: 18px;
+      left: 15px;
+      width: 30px;
+    }
+    
+    td.done input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    /* タスク名 */
+    td.task {
       font-weight: bold;
+      font-size: 1.1rem;
+      padding: 0 0 8px 35px;
+      white-space: normal; /* 長いテキストも折り返す */
+      word-break: break-all;
+    }
+
+    /* 期限 */
+    td.deadline {
+      font-size: 0.85rem;
+      color: #777;
+      padding: 0 0 8px 35px;
+    }
+
+    /* URL部分 */
+    td.url {
+      padding: 5px 0 0 35px;
+    }
+
+    .url-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .url-text {
+      font-size: 0.85rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .url-text a {
+      color: #007aff;
+      text-decoration: none;
+    }
+
+    /* 編集・削除ボタンを横並びに */
+    .actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .edit-btn, .delete-btn {
+      flex: 1;
+      max-width: 80px;
+      padding: 8px;
       border: none;
       border-radius: 8px;
+      font-weight: bold;
+      font-size: 12px;
       cursor: pointer;
+    }
+    .edit-btn { background: #eee; color: #333; }
+    .delete-btn { background: #ffebeb; color: #ff5b5b; }
+
+    /* 完了済みカードのスタイル */
+    tr.done-row {
+      background: #f8f8f8;
+      opacity: 0.6;
+    }
+    tr.done-row .task {
+      text-decoration: line-through;
+      color: #888;
     }
 
     /* モーダル */
@@ -49,157 +162,70 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.6);
       justify-content: center;
       align-items: center;
       z-index: 2000;
+      backdrop-filter: blur(4px);
     }
     .modal.active { display: flex; }
 
     .modal-content {
       background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 420px;
+      padding: 25px;
+      border-radius: 20px;
+      width: 85%;
+      max-width: 400px;
       position: relative;
     }
 
     .close-btn {
       position: absolute;
-      top: 10px;
-      right: 10px;
+      top: 15px;
+      right: 15px;
       border: none;
-      background: none;
-      font-size: 18px;
+      background: #eee;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
       cursor: pointer;
     }
 
-    .form-group {
-      margin-bottom: 12px;
-    }
-
-    label {
-      font-weight: bold;
-      display: block;
-      margin-bottom: 4px;
-    }
-
+    .form-group { margin-bottom: 15px; }
+    label { font-weight: bold; display: block; margin-bottom: 5px; font-size: 0.9rem; }
     input {
       width: 100%;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      box-sizing: border-box;
+      font-size: 16px; /* スマホでズームされないためのサイズ */
     }
 
     .save-btn {
-      margin-top: 10px;
-      padding: 8px 16px;
-      background: #4da3ff;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    table {
       width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,.1);
-      table-layout: fixed;
-    }
-
-    th, td {
-      padding: 10px;
-      border-bottom: 1px solid #e0e0e0;
-      text-align: left;
-      vertical-align: middle;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    th {
+      padding: 12px;
       background: #4da3ff;
       color: #fff;
-    }
-
-    th.done, td.done { width: 50px; text-align: center; }
-    th.task, td.task { width: 180px; }
-    th.deadline, td.deadline { width: 120px; }
-    th.url, td.url { width: 260px; }
-
-    .url-cell {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .url-text {
-      max-width: 140px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .url-text a {
-      color: #1e66ff;
-      text-decoration: none;
-    }
-
-    .actions {
-      display: inline-flex;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-
-    .edit-btn {
-      padding: 4px 8px;
-      background: #ffa94d;
-      color: #fff;
       border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-
-    .delete-btn {
-      padding: 4px 8px;
-      background: #ff6b6b;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-
-    tr.done-row {
-      background: #f0f0f0;
-      color: #999;
-    }
-
-    tr.done-row a {
-      color: #999;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 1rem;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
 
-<a href="index.html" class="back-btn">🏠 メニュー一覧へ</a>
+<a href="index.html" class="back-btn">🏠 戻る</a>
 
 <h1>📝 ToDoリスト</h1>
-<button class="add-btn" id="openModal">＋追加する</button>
+<button class="add-btn" id="openModal">＋</button>
 
-<!-- モーダル -->
 <div class="modal" id="modal">
   <div class="modal-content">
     <button class="close-btn" id="closeModal">✕</button>
-    <h2 id="modalTitle">追加</h2>
+    <h2 id="modalTitle" style="margin-top:0">追加</h2>
 
     <div class="form-group">
       <label>やること</label>
@@ -213,22 +239,14 @@
 
     <div class="form-group">
       <label>URL</label>
-      <input id="urlInput" placeholder="https://example.com">
+      <input id="urlInput" type="url" placeholder="https://example.com">
     </div>
 
-    <button class="save-btn" id="saveBtn">保存</button>
+    <button class="save-btn" id="saveBtn">保存する</button>
   </div>
 </div>
 
 <table>
-  <thead>
-    <tr>
-      <th class="done">済</th>
-      <th class="task">やること</th>
-      <th class="deadline">期限</th>
-      <th class="url">URL</th>
-    </tr>
-  </thead>
   <tbody id="listBody"></tbody>
 </table>
 
@@ -250,13 +268,12 @@
   function render() {
     listBody.innerHTML = '';
 
-    const sorted = [
-      ...data.filter(d => !d.done),
-      ...data.filter(d => d.done)
-    ];
+    // 未完了を上に、完了済みを下にソート
+    const sortedData = data.map((item, index) => ({ ...item, originalIndex: index }));
+    sortedData.sort((a, b) => a.done - b.done);
 
-    sorted.forEach(item => {
-      const index = data.indexOf(item);
+    sortedData.forEach(item => {
+      const index = item.originalIndex;
       const tr = document.createElement('tr');
       if (item.done) tr.classList.add('done-row');
 
@@ -265,12 +282,10 @@
           <input type="checkbox" ${item.done ? 'checked' : ''}>
         </td>
         <td class="task">${item.task}</td>
-        <td class="deadline">${item.deadline || ''}</td>
+        <td class="deadline">${item.deadline ? '📅 ' + item.deadline : ''}</td>
         <td class="url">
           <div class="url-cell">
-            <div class="url-text">
-              ${item.url ? `<a href="${item.url}" target="_blank">${item.url}</a>` : ''}
-            </div>
+            ${item.url ? `<div class="url-text"><a href="${item.url}" target="_blank">🔗 リンクを開く</a></div>` : ''}
             <div class="actions">
               <button class="edit-btn">編集</button>
               <button class="delete-btn">削除</button>
@@ -279,23 +294,26 @@
         </td>
       `;
 
-      tr.querySelector('input[type="checkbox"]').onchange = e => {
+      // チェックボックスの挙動
+      tr.querySelector('input[type="checkbox"]').onchange = (e) => {
         data[index].done = e.target.checked;
         saveData();
         render();
       };
 
+      // 編集ボタン
       tr.querySelector('.edit-btn').onclick = () => {
         editIndex = index;
         modalTitle.textContent = '編集';
         taskInput.value = item.task;
-        deadlineInput.value = item.deadline;
-        urlInput.value = item.url;
+        deadlineInput.value = item.deadline || '';
+        urlInput.value = item.url || '';
         modal.classList.add('active');
       };
 
+      // 削除ボタン
       tr.querySelector('.delete-btn').onclick = () => {
-        if (confirm('削除しますか？')) {
+        if (confirm('このタスクを削除しますか？')) {
           data.splice(index, 1);
           saveData();
           render();
@@ -306,6 +324,7 @@
     });
   }
 
+  // モーダル制御
   document.getElementById('openModal').onclick = () => {
     editIndex = null;
     modalTitle.textContent = '追加';
@@ -316,25 +335,29 @@
   };
 
   document.getElementById('closeModal').onclick = () => modal.classList.remove('active');
-  modal.onclick = e => { if (e.target === modal) modal.classList.remove('active'); };
+  
+  modal.onclick = (e) => {
+    if (e.target === modal) modal.classList.remove('active');
+  };
 
+  // 保存処理
   document.getElementById('saveBtn').onclick = () => {
-    if (!taskInput.value.trim()) {
-      alert('やることを入力してください');
+    const taskValue = taskInput.value.trim();
+    if (!taskValue) {
+      alert('内容を入力してください');
       return;
     }
 
     const item = {
-      task: taskInput.value.trim(),
+      task: taskValue,
       deadline: deadlineInput.value,
       url: urlInput.value.trim(),
-      done: false
+      done: editIndex !== null ? data[editIndex].done : false
     };
 
     if (editIndex === null) {
       data.push(item);
     } else {
-      item.done = data[editIndex].done;
       data[editIndex] = item;
     }
 
